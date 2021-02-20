@@ -2,6 +2,8 @@
 
 const express = require("express");
 const path = require("path");
+const fs = require("fs");
+const uniqid = require("uniqid");
 
 //Sets up express app
 
@@ -25,3 +27,15 @@ app.get("/notes", (req, res) =>
 //Server listening
 
 app.listen(PORT, () => console.log(`App is listening on PORT ${PORT}`));
+
+//Captures json
+
+fs.readFile("./db/db.json", (err, notes) => {
+  if (err) throw err;
+  let noteObj = JSON.parse(notes);
+  console.log(noteObj);
+
+  //displays current saved notes
+
+  app.get("/api/notes", (req, res) => res.json(noteObj));
+});
