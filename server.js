@@ -3,6 +3,7 @@
 const express = require("express");
 const path = require("path");
 const fs = require("fs");
+const savedNotes = require("./db/db.json");
 const uniqid = require("uniqid");
 
 //Sets up express app
@@ -24,18 +25,35 @@ app.get("/notes", (req, res) =>
   res.sendFile(path.join(__dirname, "public/notes.html"))
 );
 
+//Captures json/allows notes to be displayed
+
+app.get("/api/notes", (req, res) => {
+  return res.json(savedNotes);
+});
+
+//=======================================================================
+//Posting
+//=======================================================================
+
+//Creates new object from user input and assigns random id
+
+app.post("/api/notes", (req, res) => {
+  var newNote = {
+    title: req.body.title,
+    text: req.body.text,
+    id: uniqid(),
+  };
+  console.log(newNote);
+
+  // writes to json file
+
+  savedNotes.push(newNote);
+  fs.writeFile("./db/db.json", JSON.stringify(savedNotes), (err) => {
+    if (err) throw err;
+    return res.json(savedNotes);
+  });
+});
+
 //Server listening
 
 app.listen(PORT, () => console.log(`App is listening on PORT ${PORT}`));
-
-//Captures json
-
-fs.readFile("./db/db.json", (err, notes) => {
-  if (err) throw err;
-  let noteObj = JSON.parse(notes);
-  console.log(noteObj);
-
-  //displays current saved notes
-
-  app.get("/api/notes", (req, res) => res.json(noteObj));
-});
